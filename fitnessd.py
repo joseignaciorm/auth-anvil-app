@@ -12,9 +12,12 @@ def main():
 
 
     data = get_user_data()
-    print(api_key)
-    result = save_measurement(api_key, data)
-    print('Done!')
+    #print(api_key)
+    result = save_measurement(api_key, auth_data.get('email'), data)
+    if result:
+        print('Done!')
+    else:
+        print('Could not save measurement.')
 
 def authenticate(data: dict):
     email = data.get('email')
@@ -42,9 +45,19 @@ def get_user_data() -> dict:
         "recorded": recorded
     }
 
-def save_measurement(api_key: str, data: dict):
-    print('Would have save this to the server:')
-    print(data)
+def save_measurement(api_key: str, email: str, data: dict):
+    url = base_url + 'add_measurement'
+    auth = {
+        "email": email,
+        "api_key": api_key
+    }
+
+    data.update(auth)
+
+    resp = requests.post(url, json=data)
+    print('Server response', resp.text)
+    return resp.status_code == 200
+
 
 def get_auth_data() -> dict:
     # Get information from the user asking email and password
