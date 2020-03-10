@@ -3,9 +3,8 @@ import requests
 
 base_url = 'https://treasured-kind-mongoose.anvil.app/_/api/'
 
-def authenticate(data: dict) -> Optional[str]:
-    email = data.get('email')
-    password = data.get('password')
+# This def return the current api_key
+def authenticate(email, password) -> Optional[str]:
     url = base_url + 'authorize'
     body = {
         "email": email,
