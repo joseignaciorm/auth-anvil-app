@@ -1,9 +1,14 @@
 import datetime
 import svc
 import auth
+from gooey import Gooey, GooeyParser
 
+@Gooey('Fitnessd Local', show_success_modal=False)
 def main():
     auth.load_auth()
+
+    parser = GooeyParser(description='Fitnessd local edition - record your health on the go!')
+
     #Validating if exist data.  email and password
     if not auth.is_authorized():
         auth_data = get_auth_data()
