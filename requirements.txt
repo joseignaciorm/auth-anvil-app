@@ -2,3 +2,4 @@ numpy==1.18.1
 pytz==2019.3
 requests
 gooey
+python-dateutil

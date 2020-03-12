@@ -2,6 +2,7 @@ import datetime
 import svc
 import auth
 from gooey import Gooey, GooeyParser
+import dateutil.parser
 
 @Gooey('Fitnessd Local', show_success_modal=False)
 def main():
@@ -11,38 +12,35 @@ def main():
 
     #Validating if exist data.  email and password
     if not auth.is_authorized():
-        auth_data = get_auth_data()
-        email = auth_data.get('email')
-        password = auth_data.get('password')
+        parser.add_argument("Email", default=auth.email)
+        parser.add_argument("Password", widget="PassqordField")
+
+    parser.add_argument('Rate', help='Resting heart rate', type=int)
+    parser.add_argument('Weight', help='Weight in pounds', type=int)
+    parser.add_argument('Date', help='Date of measurement', widget='DateChooser', default=datetime.date.today())
+
+    # Showing GUI
+    data = parser.parse_args()
+    weight = int(data.Weight)
+    rate = int(data.Rate)
+    recorded = dateutil.parser.parse(data.Date)
+
+    if not auth.is_authorized():
+        email = data.Email
+        password = data.Password
         api_key = svc.authenticate(email, password)
+        if not api_key:
+            print('Error authenticating')
+            return
+        else:
+            print('Login successful!')
         auth.save_auth(email, api_key)
-    else:
-        email = auth.email
-        api_key = auth.api_key
 
-    if not api_key:
-        print('Invaid login')
-        return
-
-    data = get_user_data()
-    print(api_key)
-    result = svc.save_measurement(api_key, email, data)
+    result = svc.save_measurement(auth.api_key, auth.email, rate, weight, recorded)
     if result:
         print('Done!')
     else:
         print('Could not save measurement.')
-
-def get_user_data() -> dict:
-    print('Enter your measurment: ')
-    weight = int(input('Weight in punds: '))
-    rate = int(input('Resting heart rate: '))
-    recorded = datetime.date.today().isoformat()
-
-    return {
-        "weight": weight,
-        "rate": rate,
-        "recorded": recorded
-    }
 
 def get_auth_data() -> dict:
     # Get information from the user asking email and password
